@@ -45,25 +45,34 @@ class ProductItem extends StatelessWidget {
           ),
           footer: GridTileBar(
             leading: IconButton(
-              icon: Icon(product.isFavorite
-                  ? Icons.favorite
-                  : Icons.favorite_border),
+              icon: Icon(
+                  product.isFavorite ? Icons.favorite : Icons.favorite_border),
               onPressed: () {
                 product.toggleFavoriteStatus();
               },
-              color: Theme
-                  .of(context)
-                  .accentColor,
+              color: Theme.of(context).accentColor,
             ),
             backgroundColor: Colors.black87,
             trailing: IconButton(
               icon: Icon(Icons.shopping_cart),
               onPressed: () {
                 cart.addItem(product.id, product.price, product.title);
+                Scaffold.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      "Add to cart successful!",
+                    ),
+                    action: SnackBarAction(
+                      label: 'UNDO',
+                      onPressed: () {
+                        cart.removeSingleItem(product.id);
+                      },
+                    ),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
               },
-              color: Theme
-                  .of(context)
-                  .accentColor,
+              color: Theme.of(context).accentColor,
             ),
             title: Text(
               product.title,
