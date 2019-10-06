@@ -7,9 +7,20 @@ class AppDrawer extends StatelessWidget {
     return Drawer(
       child: Column(
         children: <Widget>[
-          AppBar(
-            title: Text('Hello'),
-            automaticallyImplyLeading: false,
+          Container(
+            child: DrawerHeader(
+              child: Center(
+                child: Text(
+                  'Hello',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 40.0,
+                  ),
+                ),
+              ),
+            ),
+            width: double.infinity,
+            color: Colors.purple,
           ),
           Divider(),
           ListTile(
