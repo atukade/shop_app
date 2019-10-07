@@ -17,7 +17,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
   final _imageUrlFocusNode = FocusNode();
   final _form = GlobalKey<FormState>();
   var _editedProduct =
-      Product(id: null, title: '', price: 0, description: '', imageUrl: '');
+  Product(id: null,
+      title: '',
+      price: 0,
+      description: '',
+      imageUrl: '');
   var _initValues = {
     'title': '',
     'description': '',
@@ -26,18 +30,54 @@ class _EditProductScreenState extends State<EditProductScreen> {
   };
 
   var isInit = true;
+  var _isLodading = false;
 
-  void _saveForm() {
+  Future<void> _saveForm() async {
     final isValid = _form.currentState.validate();
     if (!isValid) {
       return;
     }
     _form.currentState.save();
+    setState(() {
+      _isLodading = true;
+    });
+
     if (_editedProduct.id != null) {
       Provider.of<Products>(context, listen: false)
           .updateProduct(_editedProduct.id, _editedProduct);
-    } else
-      Provider.of<Products>(context, listen: false).addProduct(_editedProduct);
+      setState(() {
+        _isLodading = true;
+      });
+      Navigator.of(context).pop();
+    } else {
+      try {
+        await Provider.of<Products>(context, listen: false)
+            .addProduct(_editedProduct);
+      } catch (exception) {
+        await showDialog(
+          context: context,
+          builder: (ctx) =>
+              AlertDialog(
+                title: Text('An error occured'),
+                content: Text('Something went wrong'),
+                actions: <Widget>[
+                  FlatButton(
+                    child: Text('Okay'),
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                    },
+                  )
+                ],
+              ),
+        );
+      }
+      finally {
+        setState(() {
+          _isLodading = true;
+        });
+        Navigator.of(context).pop();
+      }
+    }
   }
 
   void _updateImageUrl() {
@@ -53,10 +93,13 @@ class _EditProductScreenState extends State<EditProductScreen> {
   @override
   void didChangeDependencies() {
     if (isInit) {
-      final productId = ModalRoute.of(context).settings.arguments as String;
+      final productId = ModalRoute
+          .of(context)
+          .settings
+          .arguments as String;
       if (productId != null) {
         final product =
-            Provider.of<Products>(context, listen: false).findById(productId);
+        Provider.of<Products>(context, listen: false).findById(productId);
         _editedProduct = product;
 
         _initValues = {
@@ -95,7 +138,11 @@ class _EditProductScreenState extends State<EditProductScreen> {
           )
         ],
       ),
-      body: Padding(
+      body: _isLodading
+          ? Center(
+        child: CircularProgressIndicator(),
+      )
+          : Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _form,
@@ -132,7 +179,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
                   keyboardType: TextInputType.number,
                   focusNode: _priceFocusNode,
                   onFieldSubmitted: (_) {
-                    FocusScope.of(context).requestFocus(_descriptionFocusNode);
+                    FocusScope.of(context)
+                        .requestFocus(_descriptionFocusNode);
                   },
                   onSaved: (value) {
                     _editedProduct = Product(
@@ -194,13 +242,15 @@ class _EditProductScreenState extends State<EditProductScreen> {
                       child: _imageUrlController.text.isEmpty
                           ? Text('Enter a URL')
                           : FittedBox(
-                              child: Image.network(_imageUrlController.text),
-                              fit: BoxFit.cover,
-                            ),
+                        child:
+                        Image.network(_imageUrlController.text),
+                        fit: BoxFit.cover,
+                      ),
                     ),
                     Expanded(
                       child: TextFormField(
-                        decoration: InputDecoration(labelText: 'ImageUrl'),
+                        decoration:
+                        InputDecoration(labelText: 'ImageUrl'),
                         keyboardType: TextInputType.url,
                         textInputAction: TextInputAction.done,
                         controller: _imageUrlController,
@@ -221,9 +271,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
                           if (value.isEmpty) {
                             return 'Please enter an imageUrl';
                           }
-                          if (value.startsWith('http') &&
-                              value.startsWith('https'))
-                            return 'Please enter a valid Url';
                           return null;
                         },
                       ),
