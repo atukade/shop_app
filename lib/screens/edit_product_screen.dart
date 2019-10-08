@@ -30,7 +30,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
   };
 
   var isInit = true;
-  var _isLodading = false;
+  var _isLoding = false;
 
   Future<void> _saveForm() async {
     final isValid = _form.currentState.validate();
@@ -39,16 +39,13 @@ class _EditProductScreenState extends State<EditProductScreen> {
     }
     _form.currentState.save();
     setState(() {
-      _isLodading = true;
+      _isLoding = true;
     });
 
     if (_editedProduct.id != null) {
-      Provider.of<Products>(context, listen: false)
+      await Provider.of<Products>(context, listen: false)
           .updateProduct(_editedProduct.id, _editedProduct);
-      setState(() {
-        _isLodading = true;
-      });
-      Navigator.of(context).pop();
+
     } else {
       try {
         await Provider.of<Products>(context, listen: false)
@@ -71,12 +68,16 @@ class _EditProductScreenState extends State<EditProductScreen> {
               ),
         );
       }
-      finally {
-        setState(() {
-          _isLodading = true;
-        });
-        Navigator.of(context).pop();
-      }
+//      finally {
+//        setState(() {
+//          _isLoding = true;
+//        });
+//        Navigator.of(context).pop();
+//      }
+      setState(() {
+        _isLoding = true;
+      });
+      Navigator.of(context).pop();
     }
   }
 
@@ -138,7 +139,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
           )
         ],
       ),
-      body: _isLodading
+      body: _isLoding
           ? Center(
         child: CircularProgressIndicator(),
       )
