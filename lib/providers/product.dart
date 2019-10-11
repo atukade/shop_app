@@ -19,16 +19,20 @@ class Product with ChangeNotifier {
     this.isFavorite = false,
   });
 
-  Future<void> toggleFavoriteStatus() async {
+  Future<void> toggleFavoriteStatus(String authToken, String userId) async {
     final oldStatus = isFavorite;
 
     isFavorite = !isFavorite;
     notifyListeners();
-    final url = 'https://shop-app-atukade.firebaseio.com/products/$id.json';
+    final url =
+        'https://shop-app-atukade.firebaseio.com/userFavorites/$userId/$id.json?auth=$authToken';
     try {
-      final response = await http.patch(url, body: json.encode({
-      'isFavorite': isFavorite,
-      }),);
+      final response = await http.put(
+        url,
+        body: json.encode({
+          isFavorite,
+        }),
+      );
       if (response.statusCode >= 400) {
         isFavorite = oldStatus;
         notifyListeners();
